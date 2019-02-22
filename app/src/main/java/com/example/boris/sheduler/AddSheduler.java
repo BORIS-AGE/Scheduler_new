@@ -210,7 +210,7 @@ public class AddSheduler extends AppCompatActivity implements PickTime, Compound
         OutputStream out = null;
         try {
             out = new FileOutputStream(file);
-            img.compress(Bitmap.CompressFormat.PNG, 1, out);
+            img.compress(Bitmap.CompressFormat.JPEG, 1, out);
             out.flush();
             out.close();
         } catch (FileNotFoundException e) {

@@ -1,7 +1,9 @@
 package com.example.boris.sheduler.Adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -61,7 +63,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyHold
             holder.days.setText("frequency: " + sheduleItem.frequency);
         }
 
-        holder.imageView.setImageURI(Uri.parse(sheduleItem.image));
+        Bitmap thumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(Uri.parse(sheduleItem.image).toString()),
+                1000, 1000);
+        holder.imageView.setImageBitmap(thumbnail);
     }
 
     @Override

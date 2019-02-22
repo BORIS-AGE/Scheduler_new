@@ -6,11 +6,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 
+import com.example.boris.sheduler.Managers.Notifier;
+
 public class NotificationReceiver extends BroadcastReceiver {
 Context context;
     @Override
     public void onReceive(Context context, Intent intent) {
         this.context = context;
+
+        String title = intent.getStringExtra("title");
+        String body = intent.getStringExtra("body");
+        int id = intent.getIntExtra("id",0);
+        new Notifier(context).run(title, body, id);
 
         if (!isMyServiceRunning(BackgroungBrain.class)){
             context.startService(new Intent(context, BackgroungBrain.class));

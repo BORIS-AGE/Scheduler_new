@@ -30,6 +30,9 @@
         <receiver
             android:name=".Managers.services.NotificationListener"
             android:exported="false" />
+        <receiver
+            android:name=".Managers.services.NotificationReceiver"
+            android:exported="false" />
 
         <activity
             android:name=".SettingsActivity"

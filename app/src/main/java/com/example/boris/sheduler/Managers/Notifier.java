@@ -77,6 +77,20 @@ public class Notifier {
         compat.notify(sheduleItem.id, builder.build());  //  - run notification ( has to be applied channel if version is > 8.0)
     }
 
+    public void run(String title, String body, int id){
+        prepare();
+
+        Intent intent = new Intent(context, NotificationListener.class);
+        intent.putExtra("id", id);
+        PendingIntent pendingIntent2 = PendingIntent.getBroadcast(context, 0,intent,0);
+        builder.addAction(R.drawable.ic_ok, "Done", pendingIntent2); // - add button with activity and image, image doesn't work on emulator
+
+        builder.setContentTitle(title);
+        builder.setContentText(body);
+        NotificationManagerCompat compat = NotificationManagerCompat.from(context);
+        compat.notify(id, builder.build());  //  - run notification ( has to be applied channel if version is > 8.0)
+    }
+
 
     private void createNotification(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){ //  - if android version > 8.0

@@ -27,18 +27,21 @@ public class BackgroungBrain extends IntentService {
 
     private final IBinder iBinder = new MyLocalBinder();
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
+
     public BackgroungBrain(String name) {
         super(name);
     }
+
     public BackgroungBrain() {
         super("scheduleService");
     }
+
     private Notifier notifier;
 
     @Override
     protected void onHandleIntent(Intent intent) {
         notifier = new Notifier(getApplicationContext());
-        if (intent == null){
+        if (intent == null) {
             continueTheShedule();
         }
         //for service not to close
@@ -64,46 +67,48 @@ public class BackgroungBrain extends IntentService {
     public IBinder onBind(Intent intent) {
         return iBinder;
     }
+
     public class MyLocalBinder extends Binder {
         public BackgroungBrain getService() {
             return BackgroungBrain.this;
         }
     }
 
-    public void setTimeOut(SheduleItem sheduleItem){
+    public void setTimeOut(SheduleItem sheduleItem) {
         cancelNotification(); // refresh value
         compositeDisposable.clear(); // refresh value
 
         long timeDelay = sheduleItem.time - new Date().getTime() - 1000;
-        if (timeDelay < 2000){ // for errors
+        if (timeDelay < 0) { // for errors
             DataBaseHelper dataBaseHelper = new DataBaseHelper(getApplicationContext());
             dataBaseHelper.delete(sheduleItem.id);
-            notifier.run(sheduleItem);
+            //notifier.run(sheduleItem);
             return;
         }
 
-        if (sheduleItem.repeat){ // it will happen once or not
-            if (sheduleItem.frequency == -1){ // repeat by day of week
+        if (sheduleItem.repeat) { // it will happen once or not
+            if (sheduleItem.frequency == -1) { // repeat by day of week
                 repeatByDayOFWeek(sheduleItem, timeDelay);
-            }else{ // repeat by frequent
+            } else { // repeat by frequent
                 repeatByFrequency(sheduleItem, timeDelay);
             }
-        }else{ // don't repeat
+        } else { // don't repeat
             happenOnlyOnce(sheduleItem, timeDelay);
         }
     }
 
-    private void happenOnlyOnce(SheduleItem sheduleItem, long timeDelay){
+    private void happenOnlyOnce(SheduleItem sheduleItem, long timeDelay) {
         compositeDisposable.add(Observable.timer(timeDelay, TimeUnit.MILLISECONDS)
                 .doOnComplete(() -> {
                     DataBaseHelper dataBaseHelper = new DataBaseHelper(getApplicationContext());
                     dataBaseHelper.delete(sheduleItem.id);
-                    notifier.run(sheduleItem);
+                    //notifier.run(sheduleItem);
                 })
                 .subscribe());
         runNotification(sheduleItem);
     }
-    private void repeatByFrequency(SheduleItem sheduleItem, long timeDelay){
+
+    private void repeatByFrequency(SheduleItem sheduleItem, long timeDelay) {
         compositeDisposable.add(Observable.timer(timeDelay, TimeUnit.MILLISECONDS)
                 .doOnComplete(() -> {
                     DataBaseHelper dataBaseHelper = new DataBaseHelper(getApplicationContext());
@@ -114,12 +119,13 @@ public class BackgroungBrain extends IntentService {
                     calendar.add(calendar.DATE, sheduleItem.frequency);
                     addToDb(calendar.getTimeInMillis(), sheduleItem.title, sheduleItem.body, sheduleItem.image, sheduleItem.frequency, sheduleItem.repeat, false, false, false, false, false, false, false);
                     continueTheShedule();
-                    notifier.run(sheduleItem);
+                    //notifier.run(sheduleItem);
                 })
                 .subscribe());
         runNotification(sheduleItem);
-        }
-    private void repeatByDayOFWeek(SheduleItem sheduleItem, long timeDelay){
+    }
+
+    private void repeatByDayOFWeek(SheduleItem sheduleItem, long timeDelay) {
         compositeDisposable.add(Observable.timer(timeDelay, TimeUnit.MILLISECONDS)
                 .doOnComplete(() -> {
                     DataBaseHelper dataBaseHelper = new DataBaseHelper(getApplicationContext());
@@ -151,7 +157,7 @@ public class BackgroungBrain extends IntentService {
                     }
                     addToDb(calendar.getTimeInMillis(), sheduleItem.title, sheduleItem.body, sheduleItem.image, -1, sheduleItem.repeat, sheduleItem.mn, sheduleItem.tu, sheduleItem.we, sheduleItem.th, sheduleItem.fr, sheduleItem.st, sheduleItem.sn);
                     continueTheShedule();
-                    notifier.run(sheduleItem);
+                    //notifier.run(sheduleItem);
                 })
                 .subscribe());
         runNotification(sheduleItem);
@@ -161,26 +167,32 @@ public class BackgroungBrain extends IntentService {
         DataBaseHelper db = new DataBaseHelper(this);
         db.addContact(time, title, body, image, frequency, repeat, mn, tu, we, th, fr, st, sn);
     }
-    private void runNotification(SheduleItem sheduleItem){
-        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+
+    private void runNotification(SheduleItem sheduleItem) {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, NotificationReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, intent, 0);
+        intent.putExtra("title", sheduleItem.title);
+        intent.putExtra("body", sheduleItem.body);
+        intent.putExtra("id", sheduleItem.id);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, sheduleItem.time, pendingIntent);
-        }else{
+        } else {
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, sheduleItem.time, pendingIntent);
         }
     }
-    private void cancelNotification(){
-        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+
+    private void cancelNotification() {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, NotificationReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, intent, 0);
         alarmManager.cancel(pendingIntent);
     }
-    public void continueTheShedule(){
+
+    public void continueTheShedule() {
         DataBaseHelper dataBaseHelper = new DataBaseHelper(getApplicationContext());
         List<SheduleItem> sheduleItems = dataBaseHelper.getSchedulers();
-        if (sheduleItems.size() > 0){
+        if (sheduleItems.size() > 0) {
             setTimeOut(sheduleItems.get(0));
         }
     }
