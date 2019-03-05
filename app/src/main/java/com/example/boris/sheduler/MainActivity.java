@@ -2,20 +2,13 @@ package com.example.boris.sheduler;
 
 import android.Manifest;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.IBinder;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,8 +17,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,6 +30,7 @@ import com.example.boris.sheduler.Models.SheduleItem;
 
 import java.util.List;
 
+import androidx.work.WorkManager;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -221,7 +213,6 @@ public class MainActivity extends AppCompatActivity  {
             BackgroungBrain.MyLocalBinder binder = (BackgroungBrain.MyLocalBinder)service;
             backgroungBrain = binder.getService();
 
-
             if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, MY_PERMISSION);
             }else if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.VIBRATE) != PackageManager.PERMISSION_GRANTED) {
@@ -235,11 +226,12 @@ public class MainActivity extends AppCompatActivity  {
                 }
             }
 
-
-
         @Override
         public void onServiceDisconnected(ComponentName name) {
             backgroungBrain = null;
         }
     };
+
+
+
 }

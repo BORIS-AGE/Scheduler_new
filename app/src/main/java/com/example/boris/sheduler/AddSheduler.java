@@ -292,10 +292,11 @@ public class AddSheduler extends AppCompatActivity implements PickTime, Compound
 
     private long getDateForRepating(int frequency) {
         Calendar c = Calendar.getInstance();
-        if (c.get(c.HOUR) > hour && c.get(c.MINUTE) + 1 > min) {
+
+        c.set(c.get(c.YEAR), c.get(c.MONTH), c.get(c.DATE), hour, min, 0);
+        if (c.getTimeInMillis() < new Date().getTime()) {
             c.add(c.DATE, frequency);
         }
-        c.set(c.get(c.YEAR), c.get(c.MONTH), c.get(c.DATE), hour, min, 0);
 
         return c.getTimeInMillis();
     }
@@ -320,7 +321,8 @@ public class AddSheduler extends AppCompatActivity implements PickTime, Compound
                 exit = false;
             }
             //if it is today, but later
-            if (calendar.get(calendar.DAY_OF_WEEK) - 1 == val && exit && calendar.get(calendar.HOUR) < hour && calendar.get(calendar.MINUTE) + 1 < min) {
+            System.out.println(calendar.get(calendar.HOUR) + " < " + hour + " && " + (calendar.get(calendar.MINUTE) + 1) + " < " +  min);
+            if (calendar.get(calendar.DAY_OF_WEEK) - 1 == val && exit && calendar.get(calendar.HOUR) <= hour && calendar.get(calendar.MINUTE) < min) {
                 exit = false;
             }
         }

@@ -46,7 +46,7 @@ public class TimerOnMain{
 
     public void start(){ // here is error with time
         //Toast.makeText(context, TimeUnit.MILLISECONDS.toHours((time - new Date().getTime())) + "", Toast.LENGTH_SHORT).show();
-        long count = TimeUnit.MILLISECONDS.toSeconds(time - new Date().getTime());
+        long count = TimeUnit.MILLISECONDS.toSeconds(time - System.currentTimeMillis());
         longs.add(-1L);
         longs.add(-1L);
         longs.add(-1L);
@@ -54,6 +54,7 @@ public class TimerOnMain{
         longs.add(-1L);
         longs.add(-1L);
 
+        resetTimer();
         compositeDisposable.add(
                 Observable.timer(1, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
@@ -67,15 +68,16 @@ public class TimerOnMain{
         );
     }
     private void resetTimer(){
-        long hours = TimeUnit.MILLISECONDS.toHours((time - new Date().getTime()));
-        long mins = TimeUnit.MILLISECONDS.toMinutes((time - new Date().getTime())) - TimeUnit.HOURS.toMinutes(hours);
-        long sec = TimeUnit.MILLISECONDS.toSeconds((time - new Date().getTime())) - TimeUnit.HOURS.toSeconds(hours) - TimeUnit.MINUTES.toSeconds(mins);
+        long days = TimeUnit.MILLISECONDS.toDays((time - System.currentTimeMillis()));
+        long hours = TimeUnit.MILLISECONDS.toHours((time - System.currentTimeMillis())) - TimeUnit.DAYS.toHours(days);
+        long mins = TimeUnit.MILLISECONDS.toMinutes((time - System.currentTimeMillis())) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours((time - System.currentTimeMillis())));
+        //long sec = TimeUnit.MILLISECONDS.toSeconds((time - new Date().getTime())) - TimeUnit.HOURS.toSeconds(hours) - TimeUnit.MINUTES.toSeconds(mins);
 
-        setDate(h1,h2,hours, 0,1);
+        setDate(h1,h2, days, 0,1);
 
-        setDate(m1, m2, mins, 2,3);
+        setDate(m1, m2, hours, 2,3);
 
-        setDate(s1, s2, sec, 4,5);
+        setDate(s1, s2, mins, 4,5);
     }
     //set validated date
     private void setDate(TextSwitcher ts1, TextSwitcher ts2, long t, int a, int b){

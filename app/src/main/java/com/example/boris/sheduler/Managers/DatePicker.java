@@ -16,7 +16,6 @@ import java.util.Calendar;
 public class DatePicker extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
 
-
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {

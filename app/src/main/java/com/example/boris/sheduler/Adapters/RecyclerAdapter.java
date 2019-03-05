@@ -64,7 +64,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyHold
         }
 
         Bitmap thumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(Uri.parse(sheduleItem.image).toString()),
-                1000, 1000);
+                500, 500);
         holder.imageView.setImageBitmap(thumbnail);
     }
 

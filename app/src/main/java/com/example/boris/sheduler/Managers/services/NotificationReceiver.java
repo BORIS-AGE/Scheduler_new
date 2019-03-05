@@ -1,31 +1,21 @@
 package com.example.boris.sheduler.Managers.services;
 
 import android.app.ActivityManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.IBinder;
-
+import android.support.annotation.NonNull;
 import com.example.boris.sheduler.Managers.Notifier;
 
-public class NotificationReceiver extends BroadcastReceiver {
-Context context;
-    @Override
-    public void onReceive(Context context, Intent intent) {
+import androidx.work.Data;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
+
+public class NotificationReceiver extends Worker {
+    private Context context;
+
+    public NotificationReceiver(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+        super(context, workerParams);
         this.context = context;
-
-        String title = intent.getStringExtra("title");
-        String body = intent.getStringExtra("body");
-        int id = intent.getIntExtra("id",0);
-        new Notifier(context).run(title, body, id);
-
-        if (!isMyServiceRunning(BackgroungBrain.class)){
-            context.startService(new Intent(context, BackgroungBrain.class));
-        }
-        IBinder binder = peekService(context, new Intent(context, BackgroungBrain.class));
-        BackgroungBrain backgroungBrain = ((BackgroungBrain.MyLocalBinder) binder).getService();
-
-        backgroungBrain.continueTheShedule();
     }
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
@@ -38,4 +28,22 @@ Context context;
         return false;
     }
 
+    @NonNull
+    @Override
+    public Result doWork() {
+        System.out.println("2 - done");
+        Data data = getInputData();
+
+        String title = data.getString("title");
+        String body = data.getString("body");
+        int id = data.getInt("id",0);
+        new Notifier(context).run(title, body, id);
+
+        if (isMyServiceRunning(BackgroungBrain.class)){
+            Intent backgroundIntent = new Intent(context, BackgroungBrain.class);
+            context.startService(backgroundIntent);
+        }
+
+        return Result.SUCCESS;
+    }
 }
